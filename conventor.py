@@ -64,6 +64,24 @@ class fumen():
                 top, left = reg.findall(content.get('style'))
                 left = self.note_map[left]
                 return(int(top) + 4, 1, left) # +4 因为图片高度为4
+            
+            elif content.get('src') == '../hhs.gif': # HH皿
+                reg = re.compile(r'\d+')
+                top, left = reg.findall(content.get('style'))
+                left = self.note_map[left]
+                return(int(top) + 4, -1, left)
+            
+            elif content.get('src') == '../lb.gif' or content.get("src") == "../lm": # HH条
+                reg = re.compile(r'\d+')
+                top, left = reg.findall(content.get('style'))
+                left = self.note_map[left]
+                return(int(top) + 4, -1, left)
+            elif content.get('src') == '../hw.gif' or content.get("src") == "../hb": # HH条
+                reg = re.compile(r'\d+')
+                top, left = reg.findall(content.get('style'))
+                left = self.note_map[left]
+                return(int(top) + 4, -1, left)
+
         elif content.name == 'span':    # BPM数字，top+5为小节线位置，理论上图片高度为2，但+1即offset到0-127，使变速线在中间
             print(content.text)
             reg = re.compile(r'top:\d+')
