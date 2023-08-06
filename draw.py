@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 import math
 
 fumen = conventor_.fumen()
-fumen.read('renai.html')
+fumen.read('10000.html')
 data = fumen.data
 long = fumen.find_long_press()
 # decide the size of image
@@ -161,13 +161,13 @@ soflan_img = Image.open('pic/t.gif').resize((greysize_x + backsize_x ,2*4))
 if len(fumen.data.iloc[:,1].diff().value_counts())>1:
     for index, row in data.iterrows():
         if row[8] != 0:
-            print(row[8])
+            # print(row[8])
             # print(index)
             mes = row[9] - 1 # 从0开始
             column = mes//4
             x = column * (backsize_x + greysize_x)
             y = (3-mes%4) * (greysize_y) + (index-2)*4
-            print(y)
+            # print(y)
             img.paste(soflan_img, (int(x), int(y)))
             draw.text((int(x + backsize_x), int(y+40)), str(int(row[8])), fill=(0,255,0), font=font)
 
