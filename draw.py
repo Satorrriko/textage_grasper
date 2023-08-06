@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 import math
 
 fumen = conventor_.fumen()
-fumen.read('em.html')
+fumen.read('renai.html')
 data = fumen.data
 long = fumen.find_long_press()
 # decide the size of image
@@ -51,6 +51,7 @@ def drawer(rail, mes, note, top):
     # note_img = Image.open(note_img_map[rail])
     note_img = note_img.resize([note_img.size[0]*4, note_img.size[1]*4])
 
+    mes -= 1 # 从0开始
     # from mes and top, get x and y
     if rail <= 7:
         column = mes//4
@@ -76,7 +77,10 @@ messize_x = backsize_x + greysize_x
 messize_y = greysize_y
 grey = (128, 128, 128)
 white = (255, 255, 255)
+green = (0, 255, 0)
 black = (0, 0, 0)
+font_mes = ImageFont.truetype('C:/Windows/Fonts/arial.ttf', 60)
+font_soflan = ImageFont.truetype('C:/Windows/Fonts/arial.ttf', 30)
 
 img = Image.new('RGB', (width*4, height*4), black)
 
@@ -134,8 +138,9 @@ for long_ in long: # 小节，轨道，长按开始位置，高度
     
     note_img = note_img.resize([note_img.size[0]*4, (long_[3]+4)*4])
 
-    column = long_[0]//4
-    row = 3-long_[0]%4
+    mes = long_[0] - 1 # 从0开始
+    column = mes//4
+    row = 3-mes%4
     x = column * (backsize_x + greysize_x) + (rail_x[long_[1]] + long_[1])*4 # +rail 以居中
     y = row * (greysize_y) + (long_[2]-5)*4 # 储存时+4，所以要-4    
 
@@ -146,11 +151,27 @@ for index, row in data.iterrows():
     # 画出notes
     for key_i in range(8):
         if row[key_i] == 1 or row[key_i] == -1:
-            print("rail =" + str(key_i) + "mes =" + str(row[9]) + "note =" + str(row[key_i]) + "top =" + str(index))
+            # print("rail =" + str(key_i) + "mes =" + str(row[9]) + "note =" + str(row[key_i]) + "top =" + str(index))
             
             note_img, location = drawer(key_i, int(row[9]), row[key_i], index)
             img.paste(note_img, location)
 
+# 画变速线
+soflan_img = Image.open('pic/t.gif').resize((greysize_x + backsize_x ,2*4))
+if len(fumen.data.iloc[:,1].diff().value_counts())>1:
+    for index, row in data.iterrows():
+        if row[8] != 0:
+            print(row[8])
+            # print(index)
+            mes = row[9] - 1 # 从0开始
+            column = mes//4
+            x = column * (backsize_x + greysize_x)
+            y = (3-mes%4) * (greysize_y) + (index-2)*4
+            print(y)
+            img.paste(soflan_img, (int(x), int(y)))
+            draw.text((int(x + backsize_x), int(y+40)), str(int(row[8])), fill=(0,255,0), font=font)
+
+        
 
 
 # draw background
