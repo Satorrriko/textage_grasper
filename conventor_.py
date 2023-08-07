@@ -3,10 +3,12 @@ import bs4
 import re
 import pandas as pd
 import numpy as np
-    
+import random
+ 
 class fumen():
     def __init__(self):
         self.data = pd.DataFrame()
+        self.song_info = ''
         self.note_map = {
             "0": 0,
             "2": 0,
@@ -29,6 +31,8 @@ class fumen():
         read_file = open(file_path, 'r', encoding='utf-8')
         soup = bs4.BeautifulSoup(read_file, 'html.parser', from_encoding='utf-8')
 
+        # get song name and artist
+        self.song_info = soup.find_all('nobr')[0].text
         soup_table = soup.find_all('table')
 
 
@@ -122,32 +126,12 @@ class fumen():
                             if top+1+height>128: height = 128 - top - 1
                             left = self.note_map[left]
                             df.iloc[top+1:top + height, left] = -0.5
-                        
-                        # elif notes.get('src') == '../lb.gif' or notes.get("src") == "../lm": # HH条
-                        #     reg = re.compile(r'\d+')
-                        #     top, left = reg.findall(notes.get('style'))
-                        #     left = self.note_map[left]
-                        #     return(int(top) + 4, -1, left)
-                        # elif notes.get('src') == '../hw.gif' or notes.get("src") == "../hb": # HH条
-                        #     reg = re.compile(r'\d+')
-                        #     top, left = reg.findall(notes.get('style'))
-                        #     left = self.note_map[left]
-                        #     return(int(top) + 4, -1, left)
 
                     elif notes.name == 'span':    # BPM数字，top+5为小节线位置，理论上图片高度为2，但+1即offset到0-127，使变速线在中间
                         # print(notes.text)
                         reg = re.compile(r'top:\d+')
                         top = int(reg.findall(notes.get('style'))[0][4:])
                         df.iloc[int((int(top) + 5 + 1)/pic_height*128), 8] = int(notes.text)
-                        
-
-                    # if location is None:
-                    #     continue
-                    # else:
-                    #     y, n, x = location
-                    #     df.iloc[y, x] = n
-
-
 
                 mes = tr.find('a').get('id')[3:]
 
@@ -158,6 +142,15 @@ class fumen():
 
     def add(self, mes):
         self.data = self.data.append(mes)
+
+    def find_soflan(self):
+        soflan_info = []
+
+        if len(self.data.iloc[:,1].diff().value_counts())>1:
+            for index, row in self.data.iterrows():
+                if row[8] != 0:
+                    soflan_info.append((index, row[9], str(int(row[8]))))
+        return soflan_info 
 
     def find_long_press(self):
 
@@ -188,3 +181,14 @@ class fumen():
 
         return long_press_info # 小节，轨道，长按开始位置，高度
 
+    def random(self, random_code):
+        # 随机
+        # code: 1-7随机轨道
+        # random_code = random.sample(range(1,8),7)
+        random_code_list = []
+        for i in range(7):
+            random_code_list.append(int(random_code[i]))
+        index = [0] + random_code_list + [8, 9]
+
+        self.data = self.data.reindex(columns=index)
+        self.data.columns = [0,1,2,3,4,5,6,7,8,9]

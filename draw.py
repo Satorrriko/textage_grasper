@@ -6,8 +6,13 @@ import math
 
 fumen = conventor_.fumen()
 fumen.read('10000.html')
+random_code = "2461357"
+fumen.random(random_code)
 data = fumen.data
+
 long = fumen.find_long_press()
+soflan = fumen.find_soflan()
+
 # decide the size of image
 ## find max in data column 9
 max_mes = data.iloc[:, 9].max()
@@ -17,17 +22,6 @@ height = 128 * 4 + 100
 # create image
 def drawer(rail, mes, note, top):
     # load note image
-    note_img_map = {
-        0: 'pic/s.gif',
-        1: 'pic/w.gif',
-        2: 'pic/b.gif',        
-        3: 'pic/w.gif',
-        4: 'pic/b.gif',        
-        5: 'pic/w.gif',
-        6: 'pic/b.gif',        
-        7: 'pic/w.gif',
-        8: 'pic/t.gif'
-    }
     rail_x = {
         0: 0,
         1: 36,
@@ -66,6 +60,12 @@ def drawer(rail, mes, note, top):
     return note_img, (x, y)
 
 ## variables
+# ┌ backsize_x ┬ greysize_x ┐                   ---
+# │------------│            │     ---            ↑
+# │------------│            │ backsize_y    greysize_y
+# │------------│            │     ---            ↓
+# └------------┴------------┘                   ---
+# | ←     messize_x       → |
 single_backsize_x = 134
 single_backsize_y = 32
 
@@ -95,9 +95,11 @@ background.paste(back, (0, backsize_y*3))
 draw_back = ImageDraw.Draw(background)
 draw_back.rectangle((backsize_x, 0, backsize_x + greysize_x, greysize_y), outline=grey, fill=grey)
 draw_back.rectangle((0, 0, backsize_x + greysize_x, greysize_y), outline=white, width=3)
-
+soflan_img = Image.open('pic/t.gif').resize((greysize_x + backsize_x ,2*4))
 
 draw = ImageDraw.Draw(img)
+draw.text((10, 4*greysize_y+10), fumen.song_info, fill=white, font=font_mes)
+draw.text((10, 4*greysize_y+10+60), "Selection: " + random_code, fill=white, font=font_mes)
 
 for mes in range(max_mes):
     # 画出背景
@@ -108,10 +110,11 @@ for mes in range(max_mes):
     y = row * (greysize_y)
     img.paste(background, (x, y))
     # 写小节名
-    font = ImageFont.truetype('C:/Windows/Fonts/arial.ttf', 60)
-    font_x, font_y = font.getsize(str(mes+1))
-    draw.text((x+backsize_x + greysize_x/2 - font_x/2, y+greysize_y/2 - font_y/2), str(mes+1), fill=white, font=font)
+    font_x, font_y = font_mes.getsize(str(mes+1))
+    draw.text((x+backsize_x + greysize_x/2 - font_x/2, y+greysize_y/2 - font_y/2), str(mes+1), fill=white, font=font_mes)
     # , y+greysize_y/2-10), str(mes+1), fill=white, font=font)
+
+
 
 # 画长条
 rail_x = {
@@ -146,34 +149,23 @@ for long_ in long: # 小节，轨道，长按开始位置，高度
 
     img.paste(note_img, (x ,y))
 
+# Draw notes
 for index, row in data.iterrows():
-    
-    # 画出notes
     for key_i in range(8):
         if row[key_i] == 1 or row[key_i] == -1:
             # print("rail =" + str(key_i) + "mes =" + str(row[9]) + "note =" + str(row[key_i]) + "top =" + str(index))
-            
             note_img, location = drawer(key_i, int(row[9]), row[key_i], index)
             img.paste(note_img, location)
 
 # 画变速线
-soflan_img = Image.open('pic/t.gif').resize((greysize_x + backsize_x ,2*4))
-if len(fumen.data.iloc[:,1].diff().value_counts())>1:
-    for index, row in data.iterrows():
-        if row[8] != 0:
-            # print(row[8])
-            # print(index)
-            mes = row[9] - 1 # 从0开始
-            column = mes//4
-            x = column * (backsize_x + greysize_x)
-            y = (3-mes%4) * (greysize_y) + (index-2)*4
-            # print(y)
-            img.paste(soflan_img, (int(x), int(y)))
-            draw.text((int(x + backsize_x), int(y+40)), str(int(row[8])), fill=(0,255,0), font=font)
+for sof in soflan: # index, row[9], row[8] 
+    mes = sof[1] - 1 # 从0开始
+    column = mes//4
+    x = column * (backsize_x + greysize_x)
+    y = (3-mes%4) * (greysize_y) + (sof[0]-2)*4
+    # print(y)
+    img.paste(soflan_img, (int(x), int(y)))
+    draw.text((int(x + backsize_x), int(y+40)), sof[3], fill=green, font=font_soflan)        
 
-        
-
-
-# draw background
 img.show()
 img.save('test.png')
