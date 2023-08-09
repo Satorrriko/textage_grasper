@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 import math
 
 fumen = conventor_.fumen()
-fumen.read('10000.html')
+fumen.read('renai.html')
 random_code = "2461357"
 fumen.random(random_code)
 data = fumen.data
@@ -110,7 +110,9 @@ for mes in range(max_mes):
     y = row * (greysize_y)
     img.paste(background, (x, y))
     # 写小节名
-    font_x, font_y = font_mes.getsize(str(mes+1))
+    font_box = font_mes.getbbox(str(mes+1))
+    font_x = font_box[2] - font_box[0]
+    font_y = font_box[3] - font_box[1]
     draw.text((x+backsize_x + greysize_x/2 - font_x/2, y+greysize_y/2 - font_y/2), str(mes+1), fill=white, font=font_mes)
     # , y+greysize_y/2-10), str(mes+1), fill=white, font=font)
 
@@ -141,7 +143,7 @@ for long_ in long: # 小节，轨道，长按开始位置，高度
     
     note_img = note_img.resize([note_img.size[0]*4, (long_[3]+4)*4])
 
-    mes = long_[0] - 1 # 从0开始
+    mes = long_[0][0] - 1 # 从0开始
     column = mes//4
     row = 3-mes%4
     x = column * (backsize_x + greysize_x) + (rail_x[long_[1]] + long_[1])*4 # +rail 以居中
@@ -165,7 +167,7 @@ for sof in soflan: # index, row[9], row[8]
     y = (3-mes%4) * (greysize_y) + (sof[0]-2)*4
     # print(y)
     img.paste(soflan_img, (int(x), int(y)))
-    draw.text((int(x + backsize_x), int(y+40)), sof[3], fill=green, font=font_soflan)        
+    draw.text((int(x + backsize_x), int(y+40)), sof[2], fill=green, font=font_soflan)        
 
 img.show()
 img.save('test.png')

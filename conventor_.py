@@ -141,7 +141,8 @@ class fumen():
         return self.data
 
     def add(self, mes):
-        self.data = self.data.append(mes)
+        # self.data = self.data.append(mes)
+        self.data = pd.concat([self.data, mes], axis=0)
 
     def find_soflan(self):
         soflan_info = []
@@ -192,3 +193,5 @@ class fumen():
 
         self.data = self.data.reindex(columns=index)
         self.data.columns = [0,1,2,3,4,5,6,7,8,9]
+
+    
